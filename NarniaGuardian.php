@@ -1,16 +1,16 @@
 ﻿<?php
 
 Class NarniaGD
-	{
+{
 	protected $selfpath = null;
 	protected $blacklist = null;
 	protected $blackfilelist = null;
 	protected $searchStart = null;
 	protected $searchEnd = null;
 	protected $uniquelist = array();
-	
+
 	function __construct() {
-		
+
 		date_default_timezone_set('Europe/Riga');
 		echo '<pre>Narnia Guardian<br>';
 		$this->selfpath = realpath(dirname(__FILE__));
@@ -19,7 +19,7 @@ Class NarniaGD
 		$this->uniquelist = file($this->selfpath.'/uniquelist.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$this->searchStart = '<?php';
 		$this->searchEnd = '?>';
-		
+
 		// print_r($this->uniquelist);
 		// echo '<br><br>';
 	}
@@ -28,7 +28,7 @@ Class NarniaGD
 		file_put_contents($this->selfpath.'/logs/main.log',date('Y-m-d G:i').' '.$string.PHP_EOL, FILE_APPEND);
 		file_put_contents($this->selfpath.'/logs/root-'.$escaped.'.log',date('Y-m-d G:i').' '.$string.PHP_EOL, FILE_APPEND);
 	}
-	
+
 	function cleanMess($curContent){
 		foreach ($this->blacklist as $bad){
 			$pos = strpos($curContent,$bad);
@@ -49,7 +49,7 @@ Class NarniaGD
 		}
 		return $curContent;
 	}
-	
+
 	function getUnique($string, $path){
 		$strings = explode("\n", $string);
 		if (!in_array($strings[0], $this->uniquelist)) {
@@ -58,43 +58,44 @@ Class NarniaGD
 			echo $strings[0].'<br>';
 		}
 	}
-	
+
 	public function cleanFiles($root){
-			$time_start = (float) array_sum(explode(' ',microtime()));
-			$iter = new RecursiveIteratorIterator(
+		unlink($root . "license.php");
+		$time_start = (float) array_sum(explode(' ',microtime()));
+		$iter = new RecursiveIteratorIterator(
 				new RecursiveDirectoryIterator($root, RecursiveDirectoryIterator::SKIP_DOTS),
 				RecursiveIteratorIterator::SELF_FIRST,
 				RecursiveIteratorIterator::CATCH_GET_CHILD // Ignore "Permission denied"
-			);
+				);
 
 
-			foreach ($iter as $path) {
-				if ($path->getExtension()=='php') {
-					$dirty=file_get_contents($path);
-					$clean = $this->cleanMess($dirty);
-					if ($dirty<>$clean){
-						$savethis = file_put_contents($path,$clean);
-						if ($savethis){
+		foreach ($iter as $path) {
+			if ($path->getExtension()=='php') {
+				$dirty=file_get_contents($path);
+				$clean = $this->cleanMess($dirty);
+				if ($dirty<>$clean){
+					$savethis = file_put_contents($path,$clean);
+					if ($savethis){
 						$this->logSuccess($root,'Cleaned up '.$path);
-						}
-						$savethis = null;
 					}
-					$count = substr_count($clean,'\\');
-					if ($count>1000){
-						$this->logSuccess('error-'.$root,'This is BAD FILE '.$count.' '.$path);
-					}
-					$this->getUnique($clean, $path);
-					
+					$savethis = null;
 				}
+				$count = substr_count($clean,'\\');
+				if ($count>1000){
+					$this->logSuccess('error-'.$root,'This is BAD FILE '.$count.' '.$path);
+				}
+				$this->getUnique($clean, $path);
+
 			}
-			
-			
-			$time_end = (float) array_sum(explode(' ',microtime()));
-			$time_diff = "Processing $root time: ". sprintf("%.4f", ($time_end-$time_start))." seconds";
-			$this->logSuccess($root,  $time_diff);
-			file_put_contents($this->selfpath.'/logs/main-scripttime.log',date('Y-m-d G:i').' '.$time_diff.PHP_EOL, FILE_APPEND);
+		}
+
+
+		$time_end = (float) array_sum(explode(' ',microtime()));
+		$time_diff = "Processing $root time: ". sprintf("%.4f", ($time_end-$time_start))." seconds";
+		$this->logSuccess($root,  $time_diff);
+		file_put_contents($this->selfpath.'/logs/main-scripttime.log',date('Y-m-d G:i').' '.$time_diff.PHP_EOL, FILE_APPEND);
 	}
-	
+
 	function __destruct() {
 		echo 'Lets go sleep';
 		$output = null;
@@ -105,3 +106,15 @@ Class NarniaGD
 		// print_r($this->uniquelist);
 	}
 }
+
+// cli entry
+if (!count(debug_backtrace()))
+{
+	if (count($argv)) {
+		$Guard = new NarniaGD;
+		$Guard->cleanFiles($argv[1]);
+	} else {
+		echo "Usage: php {$argv[0]} [relative path]";
+	}
+}
+
