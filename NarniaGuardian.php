@@ -4,26 +4,25 @@ Class NarniaGD
 {
 	protected $selfpath = null;
 	protected $blacklist = null;
-	protected $blackfilelist = null;
 	protected $searchStart = null;
 	protected $searchEnd = null;
 	protected $uniquelist = array();
+    protected $newLine = "\n";
 
 	function __construct() {
 
 		date_default_timezone_set('Europe/Riga');
-		echo '<pre>Narnia Guardian<br>';
+		echo 'Narnia Guardian';
 		$this->selfpath = realpath(dirname(__FILE__));
 		$this->blacklist = file($this->selfpath.'/blacklist.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-		$this->blackfilelist = file($this->selfpath.'/blackfilelist.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$this->uniquelist = file($this->selfpath.'/uniquelist.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$this->searchStart = '<?php';
 		$this->searchEnd = '?>';
 
-		// print_r($this->uniquelist);
-		// echo '<br><br>';
+        $this->newLine = isset($_SERVER["SERVER_NAME"]) ? "</br>" : "\n";
 	}
-	function logSuccess($root, $string){
+	function logSuccess($root, $string) {
+        echo "# " . $string;
 		$escaped = preg_replace('/[^A-Za-z0-9_\-]/', '_', $root);
 		file_put_contents($this->selfpath.'/logs/main.log',date('Y-m-d G:i').' '.$string.PHP_EOL, FILE_APPEND);
 		file_put_contents($this->selfpath.'/logs/root-'.$escaped.'.log',date('Y-m-d G:i').' '.$string.PHP_EOL, FILE_APPEND);
@@ -39,10 +38,10 @@ Class NarniaGD
 				if ($lenght<($pos+strlen($this->searchEnd)+10)){
 					$this->logSuccess('error-'.$root,'This is messed up with PHP tags '.$path);
 				}
-				echo $bad.' pos '.$pos.' start '.$start.' end '.$end.' len '.$lenght.'<br>';
+				echo $bad.' pos '.$pos.' start '.$start.' end '.$end.' len '.$lenght.$this->newLine;
 				if (($start < $end) && ($end < strlen($curContent))){
 					$curContent=substr_replace($curContent,"",$start,$lenght);
-				}else {
+				} else {
 					$this->logSuccess('error-'.$root,'This is messed up with PHP tags '.$path);
 				}
 			}
@@ -54,20 +53,19 @@ Class NarniaGD
 		$strings = explode("\n", $string);
 		if (!in_array($strings[0], $this->uniquelist)) {
 			$this->uniquelist[]=$strings[0];
-			echo $path.'<br>';
-			echo $strings[0].'<br>';
+			echo $path.$this->newLine;
+			echo $strings[0].$this->newLine;
 		}
 	}
 
 	public function cleanFiles($root){
-		unlink($root . "license.php");
+		unlink($root . "/license.php");
 		$time_start = (float) array_sum(explode(' ',microtime()));
 		$iter = new RecursiveIteratorIterator(
 				new RecursiveDirectoryIterator($root, RecursiveDirectoryIterator::SKIP_DOTS),
 				RecursiveIteratorIterator::SELF_FIRST,
 				RecursiveIteratorIterator::CATCH_GET_CHILD // Ignore "Permission denied"
 				);
-
 
 		foreach ($iter as $path) {
 			if ($path->getExtension()=='php') {
@@ -112,7 +110,7 @@ if (!count(debug_backtrace()))
 {
 	if (count($argv)) {
 		$Guard = new NarniaGD;
-		$Guard->cleanFiles($argv[1]);
+		$Guard->cleanFiles(realpath($argv[1]));
 	} else {
 		echo "Usage: php {$argv[0]} [relative path]";
 	}

