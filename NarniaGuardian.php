@@ -28,25 +28,33 @@ Class NarniaGD
 		file_put_contents($this->selfpath.'/logs/root-'.$escaped.'.log',date('Y-m-d G:i').' '.$string.PHP_EOL, FILE_APPEND);
 	}
 
-	function cleanMess($curContent){
+	function cleanMess($path){
+        $dirty = file_get_contents($path);
+        $curContent = $dirty;
 		foreach ($this->blacklist as $bad){
 			$pos = strpos($curContent,$bad);
-			if($pos){
-				$start=strrpos(substr($curContent,0,$pos), $this->searchStart);
-				$end=$pos+strpos(substr($curContent,$pos), $this->searchEnd)+strlen($this->searchEnd);
+			if($pos !== False) {
+				$end=strpos($curContent, $this->searchEnd, $pos);
 				$lenght=$end-$start;
-				if ($lenght<($pos+strlen($this->searchEnd)+10)){
-					$this->logSuccess('error-'.$root,'This is messed up with PHP tags '.$path);
-				}
+				
 				echo $bad.' pos '.$pos.' start '.$start.' end '.$end.' len '.$lenght.$this->newLine;
 				if (($start < $end) && ($end < strlen($curContent))){
 					$curContent=substr_replace($curContent,"",$start,$lenght);
 				} else {
+                    echo $path;
 					$this->logSuccess('error-'.$root,'This is messed up with PHP tags '.$path);
 				}
 			}
 		}
-		return $curContent;
+
+        if ($dirty<>$curContent){
+            $savethis = file_put_contents($path,$curContent);
+            if ($savethis){
+                echo ('Cleaned up '.$path);
+            } else {
+                echo ('Write failed '.$path);
+            }
+        }
 	}
 
 	function getUnique($string, $path){
@@ -69,13 +77,14 @@ Class NarniaGD
 
 		foreach ($iter as $path) {
 			if ($path->getExtension()=='php') {
-				$dirty=file_get_contents($path);
-				$clean = $this->cleanMess($dirty);
+				$clean = $this->cleanMess($path);
 				if ($dirty<>$clean){
 					$savethis = file_put_contents($path,$clean);
 					if ($savethis){
 						$this->logSuccess($root,'Cleaned up '.$path);
-					}
+					} else {
+						echo ('Write failed '.$path);
+                    }
 					$savethis = null;
 				}
 				$count = substr_count($clean,'\\');
@@ -83,10 +92,8 @@ Class NarniaGD
 					$this->logSuccess('error-'.$root,'This is BAD FILE '.$count.' '.$path);
 				}
 				$this->getUnique($clean, $path);
-
 			}
 		}
-
 
 		$time_end = (float) array_sum(explode(' ',microtime()));
 		$time_diff = "Processing $root time: ". sprintf("%.4f", ($time_end-$time_start))." seconds";
