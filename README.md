@@ -1,7 +1,18 @@
 # Narnia Guardian - server backdoor killer
-#### N!B! Read everything before begin clean up
-### Level - intermediate - there is manual work involved
 
+## How to use
+
+1. Download `WordpressGuardian` source code
+2. Backup your affected wordpress copy 
+2. `bash NarniaGuardian.sh [path to wordpress root]`
+3. Find suspicious/malicious long-line unreaable code, update pattern in `blacklist.txt` 
+4. Go back to step 2 
+
+## Other approaches
+Just find long lines (longer than 1024 characters), and remove them. 
+
+## Other useful information from Pilskalns/Narnia-Guardian
+ 
 Maybe you are here because of [MailPoet](http://blog.sucuri.net/2014/10/wordpress-websites-continue-to-get-hacked-via-mailpoet-plugin-vulnerability.html)  or [StackOverflow](http://stackoverflow.com/questions/25996752/removing-a-string-in-a-php-file-with-start-and-end/28430880)
 
 This tool is created to clean infected PHP files which contains obfuscated code or contains dangerous server backdoor. There is code sample on StackOverflow for UNIX system's with root access, but not always you would have it + with those samples, you never know what modifications of bad code you have. With method below you can fine tune bad sample library to match your case.
@@ -13,8 +24,6 @@ If you got this bad code on your server, it could be triggered any time and coul
 ## Lyrics before action
 To create this, I have donated two workday's to clean up private server, please contribute with code comments, better descriptions in more fluent language and other suggestions.
 So far, my motivation to update is anger on this malware, as I do not code for living and this malware code ruined our multiple site server for non-profit organisations, where I belong. I believe in open source software (OSS) and believe that OSS can be more safer than paid one, if public gives effort to it. There is so many great programmers amongst us, unfortunately, at least as much, there are ones, who use their skills for personal good doing bad things.
-
----
 
 ## How does malware code looks like?
 It will be in begining of PHP file and begins and closes with `<?php` and `?>`. This is safest way to inject this code inside already existing code file. In future, malware could get smarter and hide between set of valid code. So, for example **you have**
@@ -81,23 +90,3 @@ It now becomes clear, why I told you all that -
 * If it is your own code - walk OVER it ALL manually - check if it is escaped from form inputs, SQL injections etc.
 * Ask your hosting provider to assign new public IP
 * Pray God, that your super-secret files didn't got stolen
-* google more about this issue
-
----
-
-## TODO:
-**I have told all I know (what you should know to clean server). If this repro gets popular, I will update code so it could work as passive guard over server of ten's of thousand's of PHP files. For that and so in future I can remember all ideas, here goes my todo feature list:**
-
-1. Silent mode to be run behind scenes not distracting with ugly output of numbers and codes
-2. Email-notification if this code finds bad code.
-3. Detection level / flags - whether to output on screen, to send warning email, to auto-delete
-3. Auto - learn blacklist sample list (smarter detection).
-4. Extend out-of-the-box blacklist library, but it shouldn't be too large as it increase script run time. Please send, your set of library samples.
-5. **If this get's really popular:** Will create auto-updater for sample list from public commit repro, but this is dangerous action. In this case Guardian should be ran from hidden location, for example, if you host many PHP sites, and want passive protection against backdoors, because, you newer know, what site owner will do wrong.
-
-## Why does `Narnia`?
-Project names containing `Narnia` I give if the code is meant to be run into private / hidden locations, without public access. If you see my project containing `Narnia` and you don't have any idea why you see it, it means that you have run into wrong place or something is broken and now you see it. Just like in the movie, it is a real magic...
-
----
-# More N!B! - test it first - You could lose content of all your php files or ruin code inside them.
-**I strongly suggest to test clean up script on localhost with corrupted files or at least on copy inside your host. Once I release this to public domain, script runs perfectly, but hackers don't sleep and they could affect their code, so my guardian won't clean it up any more or so that script will delete more than should.**
