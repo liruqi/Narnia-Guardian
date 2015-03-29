@@ -1,4 +1,4 @@
-# Narnia Guardian - server backdoor killer
+# Wordpress Guardian - wordpress backdoor killer
 
 ## How to use
 
