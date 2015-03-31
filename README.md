@@ -5,7 +5,7 @@
 1. Download `WordpressGuardian` source code
 2. Backup your affected wordpress copy 
 2. `bash NarniaGuardian.sh [path to wordpress root]`
-3. Find suspicious/malicious long-line unreaable code, update pattern in `blacklist.txt` 
+3. Find suspicious/malicious long-line unreable code, update pattern in `blacklist.txt` 
 4. Go back to step 2 
 
 ## Other approaches
